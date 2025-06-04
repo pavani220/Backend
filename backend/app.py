@@ -17,19 +17,18 @@ def send():
     message = request.form['message']
     numbers = [num.strip() for num in numbers_raw.split('\n') if num.strip()]
 
-    # Configure headless Chrome
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.binary_location = "/usr/bin/google-chrome"  # Chrome binary path on Render
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Required on Render
 
     driver = webdriver.Chrome(options=chrome_options)
-
     driver.get("https://web.whatsapp.com")
+
     print("Waiting for QR code login...")
-    time.sleep(25)  # Give user time to scan QR
+    time.sleep(25)  # Pause for manual QR scan
 
     for number in numbers:
         try:
