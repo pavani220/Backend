@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import urllib.parse
 import time
+import chromedriver_autoinstaller  # Auto-installs the matching ChromeDriver
 
 app = Flask(__name__)
 
@@ -17,31 +18,35 @@ def send():
     message = request.form['message']
     numbers = [num.strip() for num in numbers_raw.split('\n') if num.strip()]
 
+    # Auto-install matching chromedriver
+    chromedriver_autoinstaller.install()
+
+    # Headless Chrome options
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")  # Modern headless mode
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.binary_location = "/usr/bin/google-chrome"  # Required on Render
 
+    # Start browser
     driver = webdriver.Chrome(options=chrome_options)
     driver.get("https://web.whatsapp.com")
 
-    print("Waiting for QR code login...")
-    time.sleep(25)  # Pause for manual QR scan
+    print("⌛ Waiting for QR code login...")
+    time.sleep(25)  # Adjust as needed for login time
 
     for number in numbers:
         try:
             url = f"https://web.whatsapp.com/send?phone={number}&text={urllib.parse.quote(message)}"
             driver.get(url)
-            time.sleep(10)
+            time.sleep(10)  # Wait for chat to load
 
             send_button = driver.find_element(By.XPATH, '//span[@data-icon="send"]')
             send_button.click()
             print(f"✅ Sent message to {number}")
         except Exception as e:
             print(f"❌ Failed to send to {number}: {str(e)}")
-        time.sleep(5)
+        time.sleep(5)  # Delay between messages
 
     driver.quit()
     return "✅ Messages sent successfully!"
